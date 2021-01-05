@@ -1,80 +1,119 @@
 /*
-Armator - simulateur de jeu d'instruction ARMv5T à but pédagogique
+Armator - simulateur de jeu d'instruction ARMv5T ï¿½ but pï¿½dagogique
 Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
-termes de la Licence Publique Générale GNU publiée par la Free Software
-Foundation (version 2 ou bien toute autre version ultérieure choisie par vous).
+termes de la Licence Publique Gï¿½nï¿½rale GNU publiï¿½e par la Free Software
+Foundation (version 2 ou bien toute autre version ultï¿½rieure choisie par vous).
 
-Ce programme est distribué car potentiellement utile, mais SANS AUCUNE
+Ce programme est distribuï¿½ car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
-commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
-Licence Publique Générale GNU pour plus de détails.
+commercialisation ou d'adaptation dans un but spï¿½cifique. Reportez-vous ï¿½ la
+Licence Publique Gï¿½nï¿½rale GNU pour plus de dï¿½tails.
 
-Vous devez avoir reçu une copie de la Licence Publique Générale GNU en même
-temps que ce programme ; si ce n'est pas le cas, écrivez à la Free Software
+Vous devez avoir reï¿½u une copie de la Licence Publique Gï¿½nï¿½rale GNU en mï¿½me
+temps que ce programme ; si ce n'est pas le cas, ï¿½crivez ï¿½ la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
-États-Unis.
+ï¿½tats-Unis.
 
 Contact: Guillaume.Huard@imag.fr
-	 Bâtiment IMAG
+	 Bï¿½timent IMAG
 	 700 avenue centrale, domaine universitaire
-	 38401 Saint Martin d'Hères
+	 38401 Saint Martin d'Hï¿½res
 */
 #include "registers.h"
 #include "arm_constants.h"
 #include <stdlib.h>
+#include <stdio.h>
+
+
+
+
+
 
 struct registers_data {
+    uint32_t regs[16]; // regs[13] = SP , regs[14] = LR, regs[15] = PC
+    uint32_t cpsr;
+    uint32_t spsr;
+    uint8_t mode;
 };
 
 registers registers_create() {
-    registers r = NULL;
+    registers r = malloc(sizeof(struct registers_data));
+    r->mode = USR;
     return r;
 }
 
 void registers_destroy(registers r) {
+    free(r);
 }
 
 uint8_t get_mode(registers r) {
-    return 0;
+    return r->mode;
 } 
 
 int current_mode_has_spsr(registers r) {
-    return 0;
+    return get_mode(r) == SVC || get_mode(r) == ABT || get_mode(r) == UND || 
+            get_mode(r) == IRQ || get_mode(r) == FIQ;
 }
 
 int in_a_privileged_mode(registers r) {
-    return 0;
+    return get_mode(r) != USR;
 }
 
 uint32_t read_register(registers r, uint8_t reg) {
     uint32_t value=0;
-    return value;
+    return value = read_usr_register(r,reg);
 }
 
 uint32_t read_usr_register(registers r, uint8_t reg) {
     uint32_t value=0;
+    if(reg > 15){
+        fprintf(stderr, "Lecture impossible du registre R%u", reg);
+        exit(0);
+    }
+    value = r->regs[reg];
     return value;
 }
 
 uint32_t read_cpsr(registers r) {
     uint32_t value=0;
-    return value;
+    return value = r->cpsr;
 }
 
 uint32_t read_spsr(registers r) {
     uint32_t value=0;
-    return value;
+    if(!current_mode_has_spsr(r)){
+        fprintf(stderr, "Impossible de lire le registre spsr. Mode : %s \n", arm_get_mode_name(r->mode));
+        exit(1);
+    }
+    return value = r->spsr;
 }
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
+   
+    write_usr_register(r,reg,value);
+    
 }
 
 void write_usr_register(registers r, uint8_t reg, uint32_t value) {
+    if (reg > 15)
+    {
+        fprintf(stderr, "Ecriture impossible dans le registre %d\n", reg);
+        exit(0);
+    }
+    r->regs[reg] = value;
+
 }
 
 void write_cpsr(registers r, uint32_t value) {
+    r->cpsr = value;
 }
 
 void write_spsr(registers r, uint32_t value) {
+    if (!current_mode_has_spsr(r)){
+        fprintf(stderr, "Impossible d'Ã©cfrire dans le registre spsr en mode : %s \n", arm_get_mode_name(r->mode));
+        exit(1);
+    }
+    r->spsr = value;
+    
 }
