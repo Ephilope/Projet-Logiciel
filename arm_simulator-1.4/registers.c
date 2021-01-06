@@ -31,10 +31,8 @@ Contact: Guillaume.Huard@imag.fr
 
 
 struct registers_data {
-    uint32_t regs[16]; // regs[13] = SP , regs[14] = LR, regs[15] = PC
-    uint32_t cpsr;
-    uint32_t spsr;
-    uint8_t mode;
+    uint32_t  regist_array[22];
+
 };
 
 registers registers_create() {
