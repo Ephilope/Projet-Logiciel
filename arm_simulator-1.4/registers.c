@@ -185,9 +185,43 @@ uint32_t read_spsr(registers r) {
 }
 
 void write_register(registers r, uint8_t reg, uint32_t value) {
-   
-    write_usr_register(r,reg,value);
-    
+    switch (r->mode){
+    case USR:
+    case SYS:
+        write_usr_register(r,reg,value);
+        break;
+    case SVC:
+        if (reg >= R0 && reg <= SPSR_svc){
+            r->regs[reg] = value;
+        }
+        break;
+    case UND:
+        if ((reg >= R0 && reg <= CPSR) || (reg == R13_und || 
+            reg == R14_und || reg == SPSR_und )){
+            r->regs[reg] = value;
+        }
+        break;
+    case ABT:
+        if ((reg >= R0 && reg <= CPSR) || (reg == R13_abt || 
+            reg == R14_abt || reg == SPSR_abt )){
+            r->regs[reg] = value;
+        }
+        break;
+    case IRQ:
+        if ((reg >= R0 && reg <= CPSR) || (reg == R13_irq || 
+            reg == R14_irq || reg == SPSR_irq )){
+            r->regs[reg] = value;
+        }
+        break;
+    case FIQ:
+        if ((reg >= R0 && reg <= CPSR) || (reg >= R8_fiq && reg <= SPSR_irq)){
+            r->regs[reg] = value;
+        }
+        break;
+    default:
+        fprintf(stderr,"Erreur: %s est un mode inconnu\n", arm_get_mode_name(r->mode));
+        break;
+    }
 }
 
 void write_usr_register(registers r, uint8_t reg, uint32_t value) {
