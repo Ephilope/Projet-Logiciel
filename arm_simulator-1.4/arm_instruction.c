@@ -77,7 +77,8 @@ int condition_OK(uint8_t condition, uint8_t flag_N, uint8_t flag_Z, uint8_t flag
         result = 1;
         break;
     case UX:        // Unconditional extension : Condition code 0b1111
-        result = 1;		
+        result = 1;	
+        break;	
     default:
         result = 0;
         fprintf(stderr, "Code condition instruction inconnu [31-28]\n");
