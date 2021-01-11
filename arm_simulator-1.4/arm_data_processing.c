@@ -1,20 +1,18 @@
+
 /*
 Armator - simulateur de jeu d'instruction ARMv5T � but p�dagogique
 Copyright (C) 2011 Guillaume Huard
 Ce programme est libre, vous pouvez le redistribuer et/ou le modifier selon les
 termes de la Licence Publique G�n�rale GNU publi�e par la Free Software
 Foundation (version 2 ou bien toute autre version ult�rieure choisie par vous).
-
 Ce programme est distribu� car potentiellement utile, mais SANS AUCUNE
 GARANTIE, ni explicite ni implicite, y compris les garanties de
 commercialisation ou d'adaptation dans un but sp�cifique. Reportez-vous � la
 Licence Publique G�n�rale GNU pour plus de d�tails.
-
 Vous devez avoir re�u une copie de la Licence Publique G�n�rale GNU en m�me
 temps que ce programme ; si ce n'est pas le cas, �crivez � la Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
 �tats-Unis.
-
 Contact: Guillaume.Huard@imag.fr
 	 B�timent IMAG
 	 700 avenue centrale, domaine universitaire
@@ -27,43 +25,71 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 #include "debug.h"
 void updateFlags(){
-	
+
 }
 uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
-	return 0;
+    uint8_t value_rn = arm_read_register(p, Rn);
+    uint8_t value_rd = (value_rn & shifter_operand);
+    arm_write_register(p, Rd, value_rd);
+    updateFlags();
+    return 0;
 }
 uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
-	return 0;
+    uint8_t value_rn = arm_read_register(p, Rn);
+    uint8_t value_rd = (value_rn ^ shifter_operand);
+    arm_write_register(p, Rd, value_rd);
+    updateFlags();
+    return 0;
 }
 
 uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
 	uint8_t value_rn = arm_read_register(p, Rn);
-	uint8_t value_rd = value_rn + shifter_operand;
+	uint8_t value_rd = value_rn - shifter_operand;
 	arm_write_register(p, Rd, value_rd);
 	updateFlags();
 	return 0;
 }
 
 uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
-	return 0;	
+    uint8_t value_rn = arm_read_register(p, Rn);
+    uint8_t value_rd = shifter_operand - value_rn;
+    arm_write_register(p, Rd, value_rd);
+    updateFlags();
+    return 0;
+
 }
 uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
 	uint8_t value_rn = arm_read_register(p, Rn);
 	uint8_t value_rd = value_rn + shifter_operand;
 	arm_write_register(p, Rd, value_rd);
 	updateFlags();
-	return 0;
+    return 0;
 }
 
 uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
-	return 0;
+    uint8_t value_rn = arm_read_register(p, Rn);
+	 uint8_t value_rd = value_rn + shifter_operand ;
+    value_rd = get_Cflag(p,value_rd);
+    arm_write_register(p, Rd, value_rd);
+    updateFlags();
+    return 0;
 }
 uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
-	return 0;
+    uint8_t value_rn = arm_read_register(p, Rn);
+    uint8_t value_rd = value_rn - shifter_operand;
+    value_rd = get_Cflag(p,value_rd);
+    arm_write_register(p, Rd, value_rd);
+    updateFlags();
+    return 0;
 }
 
 uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
-	return 0;
+    uint8_t value_rn = arm_read_register(p, Rn);
+    uint8_t value_rd = shifter_operand - value_rn;
+    value_rd = get_Cflag(p,value_rd);
+    arm_write_register(p, Rd, value_rd);
+    updateFlags();
+    return 0;
 }
 
 uint32_t tst(arm_core p, uint8_t Rn, uint16_t shifter_operand){
@@ -114,7 +140,14 @@ uint32_t mvn(arm_core p, uint8_t Rd, uint16_t shifter_operand){
 	return 0;
 }
 
-
+uint8_t get_Cflag(arm_core p,uint8_t val_rd){
+    uint32_t C_flag =  arm_read_cpsr(p);
+    //voir si C veut 0 ou 1 pour l'ajouter
+    if (!get_bit(C_flag,29)){
+        val_rd = val_rd - 1  ;
+    }
+    return val_rd;
+}
 
 uint32_t select_operation(arm_core p, uint32_t ins){
 	uint32_t result = 0;
@@ -200,6 +233,7 @@ uint16_t is_shifted(uint32_t ins, uint16_t shifter_operand){
 	}
 	return result;
 }
+
 uint32_t shift_operation(uint32_t value, uint8_t shift){
 	uint32_t (*fct_shift)(uint32_t, uint8_t);
 	uint32_t result = 0;
@@ -229,7 +263,7 @@ uint32_t shift_operation(uint32_t value, uint8_t shift){
 }
 
 void set_parameters(uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint16_t *operand2){
-	//uint8_t I = (uint8_t) get_bit(ins, 25); 
+	//uint8_t I = (uint8_t) get_bit(ins, 25);
 	*opcode = (uint8_t) get_bits(ins, 24,21);
 	*S = (uint8_t) get_bit(ins, 20);
 	*Rn = (uint8_t) get_bits(ins, 19,16);;
@@ -239,24 +273,24 @@ void set_parameters(uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
 	fprintf(stdout, "data_process shift\n");
-	//uint8_t I = (uint8_t) get_bit(ins, 25); 
-	
+	//uint8_t I = (uint8_t) get_bit(ins, 25);
+
 	//uint8_t bit4 = get_bit(ins, 4);
 	//uint8_t shift = get_bits(ins, 6, 5);
 	//uint8_t shift_amount = get_bits(ins, 11, 7);
 	//uint8_t Rm = (uint8_t) get_bits(ins, 3,0);		// Register which is used as second operand
 	int result = 0;
-	
+
 	result = select_operation(p, ins);
-	
+
 	return result;
 }
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
 	fprintf(stdout, "data_process msr\n");
-	
+
 	int result = 0;
-	
+
 	result = select_operation(p, ins);
     return result;
 }
