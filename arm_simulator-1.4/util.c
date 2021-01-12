@@ -38,6 +38,14 @@ uint32_t ror(uint32_t value, uint8_t rotation) {
     return (value >> rotation) | (value << (32-rotation));
 }
 
+uint32_t set_bit(int32_t value, int position) {
+    return value | (1 << position);
+}
+
+uint32_t clr_bit(int32_t value, int position) {
+    return value & ~(1 << position);
+}
+
 int is_big_endian() {
     static uint32_t one = 1;
     return ((* (uint8_t *) &one) == 0);

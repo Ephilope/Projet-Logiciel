@@ -28,8 +28,8 @@ Contact: Guillaume.Huard@imag.fr
 #define max(x,y) ((x)>(y)?(x):(y))
 
 #define get_bit(x, i) (((x)>>(i))&1)
-#define set_bit(x, i) ((x)|(1<<(i)))
-#define clr_bit(x, i) ((x)&~(1<<(i)))
+//#define set_bit(x, i) ((x)|(1<<(i)))
+//#define clr_bit(x, i) ((x)&~(1<<(i)))
 
 #define get_bits(x, h, l) (((x)>>(l))&~(((~0)>>((h)-(l)+1))<<((h)-(l)+1)))
 #define set_bits(x, h, l, bits) \
@@ -44,6 +44,10 @@ uint32_t lsl(uint32_t value, uint8_t shift);
 uint32_t lsr(uint32_t value, uint8_t shift);
 uint32_t asr(uint32_t value, uint8_t shift);
 uint32_t ror(uint32_t value, uint8_t rotation);
+
+uint32_t set_bit(int32_t value, int position);
+
+uint32_t clr_bit(int32_t value, int position);
 
 int is_big_endian();
 #endif

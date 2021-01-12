@@ -69,8 +69,19 @@ Contact: Guillaume.Huard@imag.fr
 #include "util.h"
 #include "debug.h"
 
-void updateFlags();
- uint8_t get_Cflag(arm_core p,uint8_t val_rd);
+#define UNAFFECTED 0xFF
+
+void update_flags(arm_core p, uint8_t S, uint8_t Rd, uint8_t flag_C, uint8_t flag_V);
+void write_flags(arm_core p, uint8_t Rd, uint8_t flag_C, uint8_t flag_V);
+uint8_t carryFrom(uint32_t x, uint32_t y);
+uint8_t borrowFrom(uint32_t x, uint32_t y);
+uint8_t overflowFrom(uint32_t x, uint32_t y, uint32_t z, uint8_t opcode);
+
+uint8_t get_flag_N(arm_core p);
+uint8_t get_flag_Z(arm_core p);
+uint8_t get_flag_C(arm_core p);
+uint8_t get_flag_V(arm_core p);
+//uint8_t get_Cflag(arm_core p,uint8_t val_rd);
 
 uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand);
 uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand);
@@ -84,11 +95,11 @@ uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 uint32_t tst(arm_core p, uint8_t Rn, uint16_t shifter_operand);
 uint32_t teq(arm_core p, uint8_t Rn, uint16_t shifter_operand);
 uint32_t cmp(arm_core p, uint8_t Rn, uint16_t shifter_operand);
-int32_t cmn(arm_core p, uint8_t Rn, uint16_t shifter_operand);
+uint32_t cmn(arm_core p, uint8_t Rn, uint16_t shifter_operand);
 uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand);
-uint32_t mov(arm_core p, uint8_t Rd, uint16_t shifter_operand);
-uint32_t bic(arm_core p, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand);
-uint32_t mvn(arm_core p, uint8_t Rd, uint16_t shifter_operand);
+uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint16_t shifter_operand);
+uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand);
+uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint16_t shifter_operand);
 
 
 
