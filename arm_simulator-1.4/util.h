@@ -46,7 +46,6 @@ uint32_t asr(uint32_t value, uint8_t shift);
 uint32_t ror(uint32_t value, uint8_t rotation);
 
 uint32_t set_bit(int32_t value, int position);
-
 uint32_t clr_bit(int32_t value, int position);
 
 int is_big_endian();

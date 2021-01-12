@@ -100,7 +100,7 @@ uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
     uint32_t value_rd = (value_rn & shifter_operand);
     arm_write_register(p, Rd, value_rd);
     //uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, UNAFFECTED, UNAFFECTED); //0xFF means no updating flag 
+	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED); //0xFF means no updating flag 
     return 0;
 }
 
@@ -111,7 +111,7 @@ uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
     uint32_t value_rd = (value_rn ^ shifter_operand);
     arm_write_register(p, Rd, value_rd);
     //uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, UNAFFECTED, UNAFFECTED); //0xFF means no updating flag
+	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED); //0xFF means no updating flag
 
 	return 0;
 }
@@ -141,6 +141,7 @@ uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 
 
 uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+	
 	uint32_t value_rn = arm_read_register(p, Rn);
 	uint32_t value_rd = value_rn + shifter_operand;
 	arm_write_register(p, Rd, value_rd);
@@ -224,7 +225,7 @@ uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 	uint32_t value = arm_read_register(p, Rn) | shifter_operand;
 	arm_write_register(p, Rd, value);
 	//uint8_t flag_C = shifter_carry_out ;
-	update_flags(p, S, Rd, UNAFFECTED, UNAFFECTED);
+	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED);
 	return 0;
 }
 
@@ -286,7 +287,10 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 	uint8_t S = 0;
 	uint8_t Rn = 0;
 	uint8_t Rd = 0;
-	uint16_t shifter_operand = 0;	 // Offset applied to register Rm
+	uint16_t shifter_operand = 0;
+	
+	shifter_operand = split_merge_shifter_operand(ins);
+	
 	set_parameters(ins, &opcode, &S, &Rn, &Rd, &shifter_operand);
 	switch (opcode){
 	case AND: 		// 0000 Logical AND, Rd := Rn AND shifter_operand
@@ -346,23 +350,38 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 
 }
 
-uint16_t is_shifted(uint32_t ins, uint16_t shifter_operand){
-	//uint8_t shift = (uint8_t) get_bits(shifter_operand, 6,5); // bits 6 and 5 of instruction
-	//uint8_t Rm = (uint8_t) get_bits(shifter_operand, 3,0);
-	//uint8_t shift_amount = 0;
-	uint16_t result = 0;
-	if (!get_bit(ins, 4)){
-		//uint8_t value = get_bits(shifter_operand,11 ,7);
-		//shift_amount = shift_operation(value,shift);
-	}else if (get_bit(ins, 4)){
-			if (!get_bit(ins,7)){
-				//uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
-			}else{
-				fprintf(stderr, "Décalage maximale\n");
-				return 0;
+uint16_t split_merge_shifter_operand(uint32_t ins){
+	uint16_t shifter_operand = 0;
+	fprintf(stdout, "Avant split op2 = %x\n", get_bits(ins, 11,0));
+	uint8_t I = (uint8_t) get_bit(ins, 25);
+	if (!I){
+		uint8_t Rm = (uint8_t) get_bits(ins, 3, 0);
+		uint8_t shift = (uint8_t) get_bits(ins, 6, 5);
+		if (!get_bit(ins,4)){
+			uint8_t shift_amount = (uint8_t) get_bits(ins, 11, 7);	
+			shift_amount = shift_operation(shift_amount, shift);
+			shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
+			shifter_operand = clr_bit(shifter_operand, 4);
+			shifter_operand = set_bits(shifter_operand, 11, 7, shift_amount);
+		}else{
+			if (!get_bit(ins, 7)){
+				uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
+				Rs = shift_operation(Rs, shift);
+				shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
+				shifter_operand = set_bit(shifter_operand, 4);
+				shifter_operand = clr_bit(shifter_operand, 7);
+				shifter_operand = set_bits(shifter_operand, 11, 8, Rs);
 			}
+		}
+			
+	}else{
+		uint8_t rotate = (uint8_t) get_bits(ins, 11,8);
+		uint32_t immediate = (uint8_t) get_bits(ins, 7,0);
+		immediate = ror(immediate, rotate);
+		shifter_operand = (uint16_t) immediate;
 	}
-	return result;
+	fprintf(stdout, "Apres split op2 = %x\n", shifter_operand);
+	return shifter_operand;
 }
 
 uint32_t shift_operation(uint32_t value, uint8_t shift){
