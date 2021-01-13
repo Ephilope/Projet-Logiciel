@@ -1,4 +1,3 @@
-
 /*
 Armator - simulateur de jeu d'instruction ARMv5T � but p�dagogique
 Copyright (C) 2011 Guillaume Huard
@@ -41,16 +40,16 @@ void update_flags(arm_core p, uint8_t S, uint8_t Rd, uint8_t flag_C, uint8_t fla
 void write_flags(arm_core p, uint8_t Rd, uint8_t flag_C, uint8_t flag_V) {
   uint32_t cpsr = arm_read_cpsr(p);
   uint32_t flag_N = get_bit(arm_read_register(p, Rd), N);   //N Flag = Rd[31]
- 
-  uint32_t flag_Z = (arm_read_register(p,Rd) == 0) ;  
- 
+
+  uint32_t flag_Z = (arm_read_register(p,Rd) == 0) ;
+
   cpsr = (flag_N == 1) ? set_bit(cpsr , N) : clr_bit(cpsr, N);
   cpsr = (flag_Z == 1) ? set_bit(cpsr , Z) : clr_bit(cpsr, Z);
-  if (flag_C != UNAFFECTED) 
-  	cpsr = (flag_C == 1) ? set_bit(cpsr , C) : clr_bit(cpsr, C); 
-  if (flag_V != UNAFFECTED) 
+  if (flag_C != UNAFFECTED)
+  	cpsr = (flag_C == 1) ? set_bit(cpsr , C) : clr_bit(cpsr, C);
+  if (flag_V != UNAFFECTED)
   	cpsr = (flag_V == 1) ? set_bit(cpsr , V) : clr_bit(cpsr, V);
-  
+
   arm_write_cpsr(p, cpsr);
 
 }
@@ -100,7 +99,7 @@ uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
     uint32_t value_rd = (value_rn & shifter_operand);
     arm_write_register(p, Rd, value_rd);
     //uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED); //0xFF means no updating flag 
+	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED); //0xFF means no updating flag
     return 0;
 }
 
@@ -141,7 +140,7 @@ uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 
 
 uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
-	
+
 	uint32_t value_rn = arm_read_register(p, Rn);
 	uint32_t value_rd = value_rn + shifter_operand;
 	arm_write_register(p, Rd, value_rd);
@@ -152,7 +151,7 @@ uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 }
 
 uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
-   
+
 	uint32_t value_rd = arm_read_register(p, Rn) + shifter_operand + get_flag_C(p);
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = carryFrom(arm_read_register(p,Rn)+shifter_operand, get_flag_C(p));
@@ -162,7 +161,7 @@ uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
     return 0;
 }
 uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
-    
+
     uint32_t value_rd = arm_read_register(p, Rn) - shifter_operand - (~get_flag_C(p));
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C =  ~borrowFrom(arm_read_register(p, Rn), shifter_operand - (~get_flag_C(p)));
@@ -173,7 +172,7 @@ uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 }
 
 uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
-    
+
     uint32_t value_rd = shifter_operand - arm_read_register(p, Rn) - (~get_flag_C(p));
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = ~borrowFrom(shifter_operand - (~get_flag_C(p)), arm_read_register(p, Rn));		//NOT BorrowFrom(shifter_operand - Rn - NOT(C Flag))
@@ -189,7 +188,7 @@ uint32_t tst(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	uint32_t alu_out = arm_read_register(p, Rn) & shifter_operand;
 	//uint8_t flag_C = shifter_carry_out;
 	write_flags(p,alu_out, UNAFFECTED, UNAFFECTED);
-	
+
 	return 0;
 }
 
@@ -198,7 +197,7 @@ uint32_t teq(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	uint32_t alu_out = arm_read_register(p, Rn) ^ shifter_operand;
 	//uint8_t flag_C = shifter_carry_out;
 	write_flags(p,alu_out, UNAFFECTED, UNAFFECTED);
-	
+
 	return 0;
 }
 
@@ -208,7 +207,7 @@ uint32_t cmp(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	uint8_t flag_C = ~borrowFrom(arm_read_register(p, Rn), shifter_operand);
 	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, SUB);
 	write_flags(p,alu_out, flag_C, flag_V);
-	
+
 	return 0;
 }
 uint32_t cmn(arm_core p, uint8_t Rn, uint32_t shifter_operand){
@@ -216,7 +215,7 @@ uint32_t cmn(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	uint8_t flag_C = carryFrom(arm_read_register(p, Rn), shifter_operand);
 	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, ADD);
 	write_flags(p,alu_out, flag_C, flag_V);
-	
+
 	return 0;
 }
 
@@ -255,16 +254,6 @@ uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand){
 	return 0;
 }
 
-/*
-uint8_t get_Cflag(arm_core p,uint8_t val_rd){
-    uint32_t C_flag =  arm_read_cpsr(p);
-    //voir si C veut 0 ou 1 pour l'ajouter
-    if (!get_bit(C_flag,29)){
-        val_rd = val_rd - 1  ;
-    }
-    return val_rd;
-}
-*/
 
 uint8_t get_flag_N(arm_core p){
 	return (uint8_t) get_bit(arm_read_cpsr(p), N);
@@ -288,9 +277,9 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 	uint8_t Rn = 0;
 	uint8_t Rd = 0;
 	uint32_t shifter_operand = 0;
-	
-	
-	
+
+
+
 	set_parameters(ins, &opcode, &S, &Rn, &Rd, &shifter_operand);
 	switch (opcode){
 	case AND: 		// 0000 Logical AND, Rd := Rn AND shifter_operand
@@ -355,25 +344,29 @@ uint32_t split_merge_shifter_operand(uint32_t ins){
 	fprintf(stdout, "Avant split op2 = %8hx\n", get_bits(ins, 11,0));
 	uint8_t I = (uint8_t) get_bit(ins, 25);
 	if (!I){
-		uint8_t Rm = (uint8_t) get_bits(ins, 3, 0);
-		uint8_t shift = (uint8_t) get_bits(ins, 6, 5);
+		uint32_t Rm = (uint32_t) get_bits(ins, 3, 0);
+		uint8_t code_shift = (uint8_t) get_bits(ins, 6, 5);
 		if (!get_bit(ins,4)){
-			uint32_t shift_amount = (uint32_t) get_bits(ins, 11, 7);	
-			shifter_operand = shift_operation(shift_amount, shift);
-			shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
-			shifter_operand = clr_bit(shifter_operand, 4);
-			shifter_operand = set_bits(shifter_operand, 11, 7, shift_amount);
+			uint8_t shift_amount = (uint8_t) get_bits(ins, 11, 7);
+			shifter_operand = shift_operation(Rm, code_shift,shift_amount);
+			//shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
+			//shifter_operand = clr_bit(shifter_operand, 4);
+			//shifter_operand = set_bits(shifter_operand, 11, 7, shift_amount);
 		}else{
 			if (!get_bit(ins, 7)){
-				uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
-				Rs = shift_operation(Rs, shift);
-				shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
-				shifter_operand = set_bit(shifter_operand, 4);
-				shifter_operand = clr_bit(shifter_operand, 7);
-				shifter_operand = set_bits(shifter_operand, 11, 8, Rs);
+
+uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
+
+				//uint8_t Rs_reg = (uint8_t) get_bits(ins, 11, 8);
+				//uint32_t Rs = arm_read_register(p, Rs_reg);
+				//shifter_operand = shift_operation(Rm,code_shift,Rs);
+				//shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
+				//shifter_operand = set_bit(shifter_operand, 4);
+				//shifter_operand = clr_bit(shifter_operand, 7);
+				//shifter_operand = set_bits(shifter_operand, 11, 8, Rs);
 			}
 		}
-			
+
 	}else{
 		uint8_t rotate = (uint8_t) get_bits(ins, 11,8);
 		uint8_t immediate = (uint8_t) get_bits(ins, 7,0);
@@ -383,23 +376,23 @@ uint32_t split_merge_shifter_operand(uint32_t ins){
 	return shifter_operand;
 }
 
-uint32_t shift_operation(uint32_t value, uint8_t shift){
+uint32_t shift_operation(uint32_t value, uint8_t shift, uint8_t shift_amount){
 	uint32_t (*fct_shift)(uint32_t, uint8_t);
 	uint32_t result = 0;
 	switch (shift){
-	case LSL:
+	case 0:
 		fct_shift = lsl;
-		result = fct_shift(value, shift);
+		result = fct_shift(value, shift_amount);
 		break;
-	case LSR:
+	case 1:
 		fct_shift = lsr;
 		result = fct_shift(value, shift);
 		break;
-	case ASR:
+	case 2:
 		fct_shift = asr;
 		result = fct_shift(value, shift);
 		break;
-	case ROR:
+	case 3:
 		fct_shift = ror;
 		result = fct_shift(value, shift);
 		break;
