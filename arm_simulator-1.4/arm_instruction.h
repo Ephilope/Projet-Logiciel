@@ -41,6 +41,7 @@ Contact: Guillaume.Huard@imag.fr
 #define AL 14 		// 1110 AL Always (unconditional) -
 #define UX 15		// 1111 See Condition code 0b1111
 
+int condition_OK(uint8_t condition, uint8_t flag_N, uint8_t flag_Z, uint8_t flag_C, uint8_t flag_V);
 int arm_step(arm_core p);
 
 #endif
