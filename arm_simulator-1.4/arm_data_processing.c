@@ -94,7 +94,7 @@ uint8_t overflowFrom(uint32_t x, uint32_t y, uint32_t z, uint8_t opcode) {
 	return result;
 }
 
-uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
     //uint8_t shifter_carry_out = 0;
 	uint32_t value_rn = arm_read_register(p, Rn);
     uint32_t value_rd = (value_rn & shifter_operand);
@@ -105,7 +105,7 @@ uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 }
 
 
-uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
     //uint8_t shifter_carry_out = 0;
 	uint32_t value_rn = arm_read_register(p, Rn);
     uint32_t value_rd = (value_rn ^ shifter_operand);
@@ -116,7 +116,7 @@ uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 	return 0;
 }
 
-uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
 	uint32_t value_rn = arm_read_register(p, Rn);
 	uint32_t value_rd = value_rn - shifter_operand;
 	arm_write_register(p, Rd, value_rd);
@@ -127,7 +127,7 @@ uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 	return 0;
 }
 
-uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
     uint32_t value_rn = arm_read_register(p, Rn);
     uint32_t value_rd = shifter_operand - value_rn;
     arm_write_register(p, Rd, value_rd);
@@ -140,7 +140,7 @@ uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 }
 
 
-uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
 	
 	uint32_t value_rn = arm_read_register(p, Rn);
 	uint32_t value_rd = value_rn + shifter_operand;
@@ -151,7 +151,7 @@ uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
     return 0;
 }
 
-uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
    
 	uint32_t value_rd = arm_read_register(p, Rn) + shifter_operand + get_flag_C(p);
     arm_write_register(p, Rd, value_rd);
@@ -161,7 +161,7 @@ uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 
     return 0;
 }
-uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
     
     uint32_t value_rd = arm_read_register(p, Rn) - shifter_operand - (~get_flag_C(p));
     arm_write_register(p, Rd, value_rd);
@@ -172,7 +172,7 @@ uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
     return 0;
 }
 
-uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
     
     uint32_t value_rd = shifter_operand - arm_read_register(p, Rn) - (~get_flag_C(p));
     arm_write_register(p, Rd, value_rd);
@@ -184,7 +184,7 @@ uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
     return 0;
 }
 
-uint32_t tst(arm_core p, uint8_t Rn, uint16_t shifter_operand){
+uint32_t tst(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	//uint8_t shifter_carry_out = 0 ;
 	uint32_t alu_out = arm_read_register(p, Rn) & shifter_operand;
 	//uint8_t flag_C = shifter_carry_out;
@@ -193,7 +193,7 @@ uint32_t tst(arm_core p, uint8_t Rn, uint16_t shifter_operand){
 	return 0;
 }
 
-uint32_t teq(arm_core p, uint8_t Rn, uint16_t shifter_operand){
+uint32_t teq(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	//uint8_t shifter_carry_out = 0 ;
 	uint32_t alu_out = arm_read_register(p, Rn) ^ shifter_operand;
 	//uint8_t flag_C = shifter_carry_out;
@@ -202,7 +202,7 @@ uint32_t teq(arm_core p, uint8_t Rn, uint16_t shifter_operand){
 	return 0;
 }
 
-uint32_t cmp(arm_core p, uint8_t Rn, uint16_t shifter_operand){
+uint32_t cmp(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 
 	uint32_t alu_out = arm_read_register(p, Rn) - shifter_operand;
 	uint8_t flag_C = ~borrowFrom(arm_read_register(p, Rn), shifter_operand);
@@ -211,7 +211,7 @@ uint32_t cmp(arm_core p, uint8_t Rn, uint16_t shifter_operand){
 	
 	return 0;
 }
-uint32_t cmn(arm_core p, uint8_t Rn, uint16_t shifter_operand){
+uint32_t cmn(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	uint32_t alu_out = arm_read_register(p, Rn) + shifter_operand;
 	uint8_t flag_C = carryFrom(arm_read_register(p, Rn), shifter_operand);
 	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, ADD);
@@ -220,7 +220,7 @@ uint32_t cmn(arm_core p, uint8_t Rn, uint16_t shifter_operand){
 	return 0;
 }
 
-uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
 	//uint8_t shifter_carry_out = 0;
 	uint32_t value = arm_read_register(p, Rn) | shifter_operand;
 	arm_write_register(p, Rd, value);
@@ -229,7 +229,7 @@ uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 	return 0;
 }
 
-uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint16_t shifter_operand){
+uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand){
 	//uint8_t shifter_carry_out = 0;
 	arm_write_register(p, Rd, shifter_operand);
 	//uint8_t flag_C = shifter_carry_out;
@@ -237,7 +237,7 @@ uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint16_t shifter_operand){
 	return 0;
 }
 
-uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_operand){
+uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
 	//uint8_t shifter_carry_out = 0;
 	uint32_t value = arm_read_register(p, Rn) & (~shifter_operand);
 	arm_write_register(p, Rd, value);
@@ -246,7 +246,7 @@ uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint16_t shifter_ope
 	return 0;
 }
 
-uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint16_t shifter_operand){
+uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand){
 	//uint8_t shifter_carry_out = 0;
 	arm_write_register(p, Rd, ~shifter_operand);
 	//uint8_t flag_C = shifter_carry_out;
@@ -287,9 +287,9 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 	uint8_t S = 0;
 	uint8_t Rn = 0;
 	uint8_t Rd = 0;
-	uint16_t shifter_operand = 0;
+	uint32_t shifter_operand = 0;
 	
-	shifter_operand = split_merge_shifter_operand(ins);
+	
 	
 	set_parameters(ins, &opcode, &S, &Rn, &Rd, &shifter_operand);
 	switch (opcode){
@@ -350,16 +350,16 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 
 }
 
-uint16_t split_merge_shifter_operand(uint32_t ins){
-	uint16_t shifter_operand = 0;
-	fprintf(stdout, "Avant split op2 = %x\n", get_bits(ins, 11,0));
+uint32_t split_merge_shifter_operand(uint32_t ins){
+	uint32_t shifter_operand = 0;
+	fprintf(stdout, "Avant split op2 = %8hx\n", get_bits(ins, 11,0));
 	uint8_t I = (uint8_t) get_bit(ins, 25);
 	if (!I){
 		uint8_t Rm = (uint8_t) get_bits(ins, 3, 0);
 		uint8_t shift = (uint8_t) get_bits(ins, 6, 5);
 		if (!get_bit(ins,4)){
-			uint8_t shift_amount = (uint8_t) get_bits(ins, 11, 7);	
-			shift_amount = shift_operation(shift_amount, shift);
+			uint32_t shift_amount = (uint32_t) get_bits(ins, 11, 7);	
+			shifter_operand = shift_operation(shift_amount, shift);
 			shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
 			shifter_operand = clr_bit(shifter_operand, 4);
 			shifter_operand = set_bits(shifter_operand, 11, 7, shift_amount);
@@ -376,11 +376,10 @@ uint16_t split_merge_shifter_operand(uint32_t ins){
 			
 	}else{
 		uint8_t rotate = (uint8_t) get_bits(ins, 11,8);
-		uint32_t immediate = (uint8_t) get_bits(ins, 7,0);
-		immediate = ror(immediate, rotate);
-		shifter_operand = (uint16_t) immediate;
+		uint8_t immediate = (uint8_t) get_bits(ins, 7,0);
+		shifter_operand = ror(immediate, 2 *rotate);
 	}
-	fprintf(stdout, "Apres split op2 = %x\n", shifter_operand);
+	fprintf(stdout, "Apres split op2 = %8hx\n", shifter_operand);
 	return shifter_operand;
 }
 
@@ -412,13 +411,13 @@ uint32_t shift_operation(uint32_t value, uint8_t shift){
 	return result;
 }
 
-void set_parameters(uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint16_t *operand2){
+void set_parameters(uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint32_t *shifter_operand){
 	//uint8_t I = (uint8_t) get_bit(ins, 25);
 	*opcode = (uint8_t) get_bits(ins, 24,21);
 	*S = (uint8_t) get_bit(ins, 20);
 	*Rn = (uint8_t) get_bits(ins, 19,16);;
 	*Rd = (uint8_t) get_bits(ins, 15,12);
-	*operand2 = (uint8_t) get_bits(ins, 11, 0);	 // Offset applied to register Rm
+	*shifter_operand = split_merge_shifter_operand(ins);
 }
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
