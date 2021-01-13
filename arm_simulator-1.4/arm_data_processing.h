@@ -74,7 +74,7 @@ uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand);
 void set_parameters(uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint32_t *uint32_t);
 uint32_t select_operation(arm_core p, uint32_t ins);
 uint32_t split_merge_shifter_operand(uint32_t ins);
-uint32_t shift_operation(uint32_t value, uint8_t shift);
+uint32_t shift_operation(uint32_t value, uint8_t shift, uint8_t shift_amount);
 
 int arm_data_processing_shift(arm_core p, uint32_t ins);
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins);
