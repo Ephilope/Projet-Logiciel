@@ -277,10 +277,8 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 	uint8_t Rn = 0;
 	uint8_t Rd = 0;
 	uint32_t shifter_operand = 0;
-
-
-
-	set_parameters(ins, &opcode, &S, &Rn, &Rd, &shifter_operand);
+	uint8_t shifter_carry_out = 0;
+	set_parameters(p,ins, &opcode, &S, &Rn, &Rd, &shifter_operand, &shifter_carry_out);
 	switch (opcode){
 	case AND: 		// 0000 Logical AND, Rd := Rn AND shifter_operand
 		result = and(p, S, Rd, Rn, shifter_operand);
@@ -338,32 +336,25 @@ uint32_t select_operation(arm_core p, uint32_t ins){
     return result;
 
 }
-
-uint32_t split_merge_shifter_operand(uint32_t ins){
+/*
+uint32_t split_merge_shifter_operand(arm_core p, uint32_t ins){
 	uint32_t shifter_operand = 0;
-	fprintf(stdout, "Avant split op2 = %8hx\n", get_bits(ins, 11,0));
+	//fprintf(stdout, "Avant split op2 = 0x%08x\n", get_bits(ins, 11,0));
 	uint8_t I = (uint8_t) get_bit(ins, 25);
 	if (!I){
 		uint32_t Rm = (uint32_t) get_bits(ins, 3, 0);
+		uint32_t  value_rs = arm_read_register(p, Rm);
+		//fprintf(stdout, "Rm avant split op2 = 0x%08x\n", value_rs);
 		uint8_t code_shift = (uint8_t) get_bits(ins, 6, 5);
-		if (!get_bit(ins,4)){
+		uint8_t bit4 = (uint8_t) get_bit(ins,4);
+		if (!bit4){
 			uint8_t shift_amount = (uint8_t) get_bits(ins, 11, 7);
-			shifter_operand = shift_operation(Rm, code_shift,shift_amount);
-			//shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
-			//shifter_operand = clr_bit(shifter_operand, 4);
-			//shifter_operand = set_bits(shifter_operand, 11, 7, shift_amount);
+			shifter_operand = shift_operation(value_rs, code_shift,shift_amount);
 		}else{
 			if (!get_bit(ins, 7)){
-
-uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
-
-				//uint8_t Rs_reg = (uint8_t) get_bits(ins, 11, 8);
-				//uint32_t Rs = arm_read_register(p, Rs_reg);
-				//shifter_operand = shift_operation(Rm,code_shift,Rs);
-				//shifter_operand = set_bits(shifter_operand, 3, 0, Rm);
-				//shifter_operand = set_bit(shifter_operand, 4);
-				//shifter_operand = clr_bit(shifter_operand, 7);
-				//shifter_operand = set_bits(shifter_operand, 11, 8, Rs);
+				uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
+				uint32_t value_rs = arm_read_register(p, Rs);
+				shifter_operand = shift_operation(value_rs, code_shift, value_rs);
 			}
 		}
 
@@ -371,28 +362,30 @@ uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
 		uint8_t rotate = (uint8_t) get_bits(ins, 11,8);
 		uint8_t immediate = (uint8_t) get_bits(ins, 7,0);
 		shifter_operand = ror(immediate, 2 *rotate);
+		
 	}
-	fprintf(stdout, "Apres split op2 = %8hx\n", shifter_operand);
+	//fprintf(stdout, "Apres split op2 = 0x%08x\n", shifter_operand);
+	//fprintf(stdout, "Rm apres split op2 = 0x%08x\n", get_bits(ins, 3,0));
 	return shifter_operand;
-}
+}*/
 
 uint32_t shift_operation(uint32_t value, uint8_t shift, uint8_t shift_amount){
 	uint32_t (*fct_shift)(uint32_t, uint8_t);
 	uint32_t result = 0;
 	switch (shift){
-	case 0:
+	case LSL:
 		fct_shift = lsl;
-		result = fct_shift(value, shift_amount);
+		result =  fct_shift(value, shift_amount);
 		break;
-	case 1:
+	case LSR:
 		fct_shift = lsr;
 		result = fct_shift(value, shift);
 		break;
-	case 2:
+	case ASR:
 		fct_shift = asr;
 		result = fct_shift(value, shift);
 		break;
-	case 3:
+	case ROR:
 		fct_shift = ror;
 		result = fct_shift(value, shift);
 		break;
@@ -404,35 +397,141 @@ uint32_t shift_operation(uint32_t value, uint8_t shift, uint8_t shift_amount){
 	return result;
 }
 
-void set_parameters(uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint32_t *shifter_operand){
+void write_shift_operand_sco(arm_core p, uint32_t ins, uint32_t *shifter_operand, uint8_t *shifter_carry_out){
+	//uint8_t shifter_carry_out = 0;
+	uint8_t I = (uint8_t) get_bit(ins, 25);
+	
+	if (!I){
+		uint8_t Rm = (uint8_t) get_bits(ins, 3,0);
+		uint8_t shift_amount = (uint8_t) get_bits(ins, 11, 7);
+		//uint8_t shift = (uint8_t) get_bits(ins, 6,5);
+		uint32_t  value_rm = arm_read_register(p, Rm);
+		//fprintf(stdout, "Rm avant split op2 = 0x%08x\n", value_rs);
+		uint8_t code_shift = (uint8_t) get_bits(ins, 6, 5);
+		uint8_t bit4 = (uint8_t) get_bit(ins,4);
+		if ( (get_bits(ins, 11, 4) & 0xFF) == 0){
+			*shifter_operand = value_rm;
+			*shifter_carry_out = get_flag_C(p);
+		}
+		
+		if (!bit4){
+			if (code_shift == LSL){
+				*shifter_operand = (shift_amount == 0) ? value_rm : shift_operation(value_rm, code_shift,shift_amount);
+				*shifter_carry_out  = (shift_amount == 0) ? get_flag_C(p) : get_bit(value_rm, 32-shift_amount);   //Rm[32 - shift_imm]
+			}else if(code_shift == LSR){
+				*shifter_operand = (shift_amount == 0) ? 0 : shift_operation(value_rm, code_shift,shift_amount);
+				*shifter_carry_out  = (shift_amount == 0) ? get_bit(value_rm, 31):get_bit(value_rm, shift_amount-1);
+			}else if(code_shift == ASR){
+				if((shift_amount == 0)){
+					*shifter_operand =  (!get_bit(value_rm, 31)) ? 0 : 0xFFFFFFFF;
+					*shifter_carry_out  = (!get_bit(value_rm, 31) ) ? get_bit(value_rm, 31) : get_bit(value_rm, 31);
+				}else{
+					*shifter_operand =  shift_operation(value_rm, code_shift,shift_amount);
+					*shifter_carry_out  = get_bit(value_rm, shift_amount -1);
+				}	
+			}else if(code_shift == ROR){
+				uint32_t x = 0 ;
+				x = lsl(get_flag_C(p), 31) | lsr(value_rm,1);  //(C Flag Logical_Shift_Left 31) OR (Rm Logical_Shift_Right 1)
+				*shifter_operand = (shift_amount == 0) ? x : shift_operation(value_rm, code_shift,shift_amount);
+				*shifter_carry_out  = (shift_amount == 0) ? get_bit(value_rm, 0) : get_bit(value_rm, shift_amount -1);
+			}
+			
+		}else{
+			uint8_t Rs = (uint8_t) get_bits(ins, 11, 8);
+			uint32_t value_rs = arm_read_register(p, Rs);
+			if (!get_bit(ins, 7)){
+				if (code_shift == LSL){
+					uint8_t value_Rs_bits_7_0 = (uint8_t) (get_bits(value_rs, 7, 0));
+					if ( value_Rs_bits_7_0 == 0){ 	//Rs[7:0] == 0 
+						*shifter_operand = value_rm;
+						*shifter_carry_out = get_flag_C(p);
+					}
+					else if ( value_Rs_bits_7_0 < 32 ){ //Rs[7:0] < 32 
+						*shifter_operand = shift_operation(value_rm, code_shift, value_Rs_bits_7_0);  // Rm Logical_Shift_Left Rs[7:0]
+						*shifter_carry_out =  get_bit(value_rm, 32 - value_Rs_bits_7_0);  //Rm[32 - Rs[7:0] ]
+					}
+					else if(value_Rs_bits_7_0 == 32){ //Rs[7:0] == 32 then
+						*shifter_operand = 0 ;
+						*shifter_carry_out = get_bit(value_rm,0);		//Rm[31]
+					}
+					else{ /* Rs[7:0] > 32 */
+						*shifter_operand = 0 ;
+						*shifter_carry_out = 0 ;
+					}
+				}else if(code_shift == LSR){
+					uint8_t value_Rs_bits_7_0 = (uint8_t) (get_bits(value_rs, 7, 0));
+					if ( value_Rs_bits_7_0 == 0){ 	//Rs[7:0] == 0 
+						*shifter_operand = value_rm;
+						*shifter_carry_out = get_flag_C(p);
+					}
+					else if ( value_Rs_bits_7_0 < 32 ){ //Rs[7:0] < 32 
+						*shifter_operand = shift_operation(value_rm, code_shift, value_Rs_bits_7_0);  // Rm Logical_Shift_Right Rs[7:0]
+						*shifter_carry_out =  get_bit(value_rm, value_Rs_bits_7_0 - 1);  //Rm[Rs[7:0] - 1]
+					}
+					else if(value_Rs_bits_7_0 == 32){ //Rs[7:0] == 32 then
+						*shifter_operand = 0 ;
+						*shifter_carry_out = get_bit(value_rm,31);		//Rm[31]
+					}
+					else{ /* Rs[7:0] > 32 */
+						*shifter_operand = 0 ;
+						*shifter_carry_out = 0 ;
+					}
+				}else if(code_shift == ASR){
+					uint8_t value_Rs_bits_7_0 = (uint8_t) (get_bits(value_rs, 7, 0));
+					if ( value_Rs_bits_7_0 == 0){ 	//Rs[7:0] == 0 
+						*shifter_operand = value_rm;
+						*shifter_carry_out = get_flag_C(p);
+					}
+					else if ( value_Rs_bits_7_0 < 32 ){ //Rs[7:0] < 32 
+						*shifter_operand = shift_operation(value_rm, code_shift, value_Rs_bits_7_0);  // Rm Arithmetic_Shift_Right Rs[7:0]
+						*shifter_carry_out =  get_bit(value_rm, value_Rs_bits_7_0 - 1);  //Rm[Rs[7:0] - 1]
+					}
+					else{ /* Rs[7:0] >= 32 */
+						*shifter_operand = (!get_bit(value_rm,31)) ? 0 : 0xFFFFFFFF;
+						*shifter_carry_out =  get_bit(value_rm,31);
+					}
+				}else if(code_shift == ROR){
+					*shifter_operand = (get_bits(arm_read_register(p, Rs), 7, 0) == 0) ?  // Rs[7:0] == 0 then
+				 					(get_bits(arm_read_register(p, Rs), 4, 0) == 0) ? // Rs[4:0] == 0 
+									value_rm : value_rm : shift_operation(value_rm, code_shift, get_bits(value_rs, 4, 0));
+									// Rm       Rm  		 Rm Rotate_Right Rs[4:0]
+		
+					*shifter_carry_out = (get_bits(arm_read_register(p, Rs), 7, 0) == 0) ?  
+				 					 (get_bits(arm_read_register(p, Rs), 4, 0) == 0) ?
+									  get_flag_C(p):get_bit(value_rm,31):get_bit(value_rm, (uint8_t)get_bits(value_rs, 4,0)- 1);
+									  // flag C 		Rm[31]				Rm[Rs[4:0] - 1]
+				}
+			}
+		}
+	}else{
+		uint8_t rotate_imm = (uint8_t) get_bits(ins, 11,8);
+		uint8_t immediate = (uint8_t) get_bits(ins, 7,0);
+		*shifter_operand = ror(immediate, 2 *rotate_imm);
+		*shifter_carry_out = ( rotate_imm == 0 ) ? get_flag_C(p) : (uint8_t) get_bit(*shifter_operand, 31);	
+	}
+	
+}
+
+
+void set_parameters(arm_core p, uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint32_t *shifter_operand, uint8_t *shifter_carry_out){
 	//uint8_t I = (uint8_t) get_bit(ins, 25);
 	*opcode = (uint8_t) get_bits(ins, 24,21);
 	*S = (uint8_t) get_bit(ins, 20);
-	*Rn = (uint8_t) get_bits(ins, 19,16);;
+	*Rn = (uint8_t) get_bits(ins, 19,16);
 	*Rd = (uint8_t) get_bits(ins, 15,12);
-	*shifter_operand = split_merge_shifter_operand(ins);
+	write_shift_operand_sco(p, ins, shifter_operand, shifter_carry_out);
 }
 /* Decoding functions for different classes of instructions */
 int arm_data_processing_shift(arm_core p, uint32_t ins) {
-	fprintf(stdout, "data_process shift\n");
-	//uint8_t I = (uint8_t) get_bit(ins, 25);
-
-	//uint8_t bit4 = get_bit(ins, 4);
-	//uint8_t shift = get_bits(ins, 6, 5);
-	//uint8_t shift_amount = get_bits(ins, 11, 7);
-	//uint8_t Rm = (uint8_t) get_bits(ins, 3,0);		// Register which is used as second operand
 	int result = 0;
-
 	result = select_operation(p, ins);
 
 	return result;
 }
 
 int arm_data_processing_immediate_msr(arm_core p, uint32_t ins) {
-	fprintf(stdout, "data_process msr\n");
-
 	int result = 0;
-
 	result = select_operation(p, ins);
-    return result;
+    
+	return result;
 }
