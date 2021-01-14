@@ -43,5 +43,6 @@ Contact: Guillaume.Huard@imag.fr
 
 int condition_OK(uint8_t condition, uint8_t flag_N, uint8_t flag_Z, uint8_t flag_C, uint8_t flag_V);
 int arm_step(arm_core p);
+int arm_decode(arm_core p);
 
 #endif

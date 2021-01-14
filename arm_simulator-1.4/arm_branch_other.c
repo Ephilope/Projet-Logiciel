@@ -41,7 +41,7 @@ int arm_branch(arm_core p, uint32_t ins) {
     	res = get_bits(ins,23,0)<< 2 ;
         arm_write_register(p, 15, (arm_read_register(p, 15) + res ));
     }
-    return 1;
+    return 0;
 }
 
 int arm_coprocessor_others_swi(arm_core p, uint32_t ins) {//Instruction SWI page 360 doc ARM

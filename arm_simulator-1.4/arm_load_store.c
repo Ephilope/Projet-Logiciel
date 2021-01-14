@@ -260,7 +260,7 @@ int arm_load_store(arm_core p, uint32_t ins) {
  			arm_write_word(p, address, word);
  		}
  	}
-    return UNDEFINED_INSTRUCTION;
+    return 0;
 }
 
 // load store multiple LDM(1) , STM(1)
@@ -345,7 +345,7 @@ int arm_load_store_multiple(arm_core p, uint32_t ins) {
 		assert(end_address == (address - 4));
 		}
 	}
-    return UNDEFINED_INSTRUCTION;
+    return 0;
 }
 
 //Load/Store Signed Byte : HalfWord - DoubleWord

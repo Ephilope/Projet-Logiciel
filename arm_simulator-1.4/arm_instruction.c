@@ -109,7 +109,7 @@ int arm_decode(arm_core p){
     uint8_t flag_V = (u_int8_t) get_bit(cpsr, V);
 
     if (!condition_OK(cond, flag_N, flag_Z, flag_C, flag_V)){
-        return 1;
+        result = UNDEFINED_INSTRUCTION;
     }
     // ge bit fields in the interval [27-25]
     uint8_t code_instruction = (uint8_t)get_bits(instruction,27, 25);
@@ -171,8 +171,6 @@ int arm_decode(arm_core p){
 
 static int arm_execute_instruction(arm_core p) {
     int result = arm_decode(p);
-    if (result)
-        arm_exception(p, result);
     return result;
 }
 

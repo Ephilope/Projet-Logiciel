@@ -53,8 +53,8 @@ uint8_t get_flag_C(arm_core p);
 uint8_t get_flag_V(arm_core p);
 //uint8_t get_Cflag(arm_core p,uint8_t val_rd);
 
-uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
-uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
+uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out);
+uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out);
 uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
 uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
 uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
@@ -62,14 +62,14 @@ uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
 uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
 uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
-uint32_t tst(arm_core p, uint8_t Rn, uint32_t shifter_operand);
-uint32_t teq(arm_core p, uint8_t Rn, uint32_t shifter_operand);
+uint32_t tst(arm_core p, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out);
+uint32_t teq(arm_core p, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out);
 uint32_t cmp(arm_core p, uint8_t Rn, uint32_t shifter_operand);
 uint32_t cmn(arm_core p, uint8_t Rn, uint32_t shifter_operand);
-uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
-uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand);
-uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand);
-uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand);
+uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out);
+uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand, uint8_t shifter_carry_out);
+uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t , uint8_t shifter_carry_out);
+uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand, uint8_t shifter_carry_out);
 
 void set_parameters(arm_core p, uint32_t ins,uint8_t *opcode, uint8_t *S, uint8_t *Rn, uint8_t *Rd, uint32_t *shifter_operand, uint8_t *shifter_carry_out);
 uint32_t select_operation(arm_core p, uint32_t ins);

@@ -80,37 +80,32 @@ uint8_t borrowFrom(uint32_t x, uint32_t y) {
 
 uint8_t overflowFrom(uint32_t x, uint32_t y, uint32_t z, uint8_t opcode) {
 	uint8_t result = 0;
-	switch (opcode){
-	case ADD:
+	if (opcode)
 		result = ( ((x >> 31) == (y >> 31)) && (x >> 31) == z >> 31 );
-		break;
-	case SUB:
+	else
 		result = ((x >> 31) != (y >> 31)) && ((x >> 31) != (z >> 31));
-	default:
-		fprintf(stderr, "Erreur : Dans overflowFrom");
-		break;
-	}
+
 	return result;
 }
 
-uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
+uint32_t and(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out){
     //uint8_t shifter_carry_out = 0;
 	uint32_t value_rn = arm_read_register(p, Rn);
     uint32_t value_rd = (value_rn & shifter_operand);
     arm_write_register(p, Rd, value_rd);
     //uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED); //0xFF means no updating flag
+	update_flags(p, S, Rd, shifter_carry_out, UNAFFECTED); //0xFF means no updating flag
     return 0;
 }
 
 
-uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
+uint32_t eor(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out){
     //uint8_t shifter_carry_out = 0;
 	uint32_t value_rn = arm_read_register(p, Rn);
     uint32_t value_rd = (value_rn ^ shifter_operand);
     arm_write_register(p, Rd, value_rd);
     //uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED); //0xFF means no updating flag
+	update_flags(p, S, Rd, shifter_carry_out, UNAFFECTED); //0xFF means no updating flag
 
 	return 0;
 }
@@ -183,20 +178,20 @@ uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
     return 0;
 }
 
-uint32_t tst(arm_core p, uint8_t Rn, uint32_t shifter_operand){
+uint32_t tst(arm_core p, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out){
 	//uint8_t shifter_carry_out = 0 ;
 	uint32_t alu_out = arm_read_register(p, Rn) & shifter_operand;
 	//uint8_t flag_C = shifter_carry_out;
-	write_flags(p,alu_out, UNAFFECTED, UNAFFECTED);
+	write_flags(p,alu_out, shifter_carry_out, UNAFFECTED);
 
 	return 0;
 }
 
-uint32_t teq(arm_core p, uint8_t Rn, uint32_t shifter_operand){
+uint32_t teq(arm_core p, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out){
 	//uint8_t shifter_carry_out = 0 ;
 	uint32_t alu_out = arm_read_register(p, Rn) ^ shifter_operand;
 	//uint8_t flag_C = shifter_carry_out;
-	write_flags(p,alu_out, UNAFFECTED, UNAFFECTED);
+	write_flags(p,alu_out, shifter_carry_out, UNAFFECTED);
 
 	return 0;
 }
@@ -219,37 +214,37 @@ uint32_t cmn(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	return 0;
 }
 
-uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
+uint32_t orr(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out){
 	//uint8_t shifter_carry_out = 0;
 	uint32_t value = arm_read_register(p, Rn) | shifter_operand;
 	arm_write_register(p, Rd, value);
 	//uint8_t flag_C = shifter_carry_out ;
-	update_flags(p, S, Rd, get_flag_C(p), UNAFFECTED);
+	update_flags(p, S, Rd, shifter_carry_out, UNAFFECTED);
 	return 0;
 }
 
-uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand){
+uint32_t mov(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand, uint8_t shifter_carry_out){
 	//uint8_t shifter_carry_out = 0;
 	arm_write_register(p, Rd, shifter_operand);
 	//uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, UNAFFECTED, UNAFFECTED);
+	update_flags(p, S, Rd, shifter_carry_out, UNAFFECTED);
 	return 0;
 }
 
-uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand){
+uint32_t bic(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_operand, uint8_t shifter_carry_out){
 	//uint8_t shifter_carry_out = 0;
 	uint32_t value = arm_read_register(p, Rn) & (~shifter_operand);
 	arm_write_register(p, Rd, value);
 	//uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, UNAFFECTED, UNAFFECTED);
+	update_flags(p, S, Rd, shifter_carry_out, UNAFFECTED);
 	return 0;
 }
 
-uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand){
+uint32_t mvn(arm_core p, uint8_t S, uint8_t Rd, uint32_t shifter_operand, uint8_t shifter_carry_out){
 	//uint8_t shifter_carry_out = 0;
 	arm_write_register(p, Rd, ~shifter_operand);
 	//uint8_t flag_C = shifter_carry_out;
-	update_flags(p, S, Rd, UNAFFECTED, UNAFFECTED);
+	update_flags(p, S, Rd, shifter_carry_out, UNAFFECTED);
 
 	return 0;
 }
@@ -281,10 +276,10 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 	set_parameters(p,ins, &opcode, &S, &Rn, &Rd, &shifter_operand, &shifter_carry_out);
 	switch (opcode){
 	case AND: 		// 0000 Logical AND, Rd := Rn AND shifter_operand
-		result = and(p, S, Rd, Rn, shifter_operand);
+		result = and(p, S, Rd, Rn, shifter_operand, shifter_carry_out);
 		break;
 	case EOR:		// 0001 Logical Exclusive OR,  Rd := Rn EOR shifter_operand
-		result = eor(p, S, Rd, Rn, shifter_operand);
+		result = eor(p, S, Rd, Rn, shifter_operand, shifter_carry_out);
 		break;
 	case SUB:		// 0010 SUB Subtract, Rd := Rn - shifter_operand
 		result = sub(p, S, Rd, Rn, shifter_operand);
@@ -305,10 +300,10 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 		result = rsc(p, S, Rd, Rn, shifter_operand);
 		break;
 	case TST: 		// 1000 TST Test Update flags after, Rn AND shifter_operand
-		result = tst(p, Rn, shifter_operand);
+		result = tst(p, Rn, shifter_operand, shifter_carry_out);
 		break;
 	case TEQ: 		// 1001 TEQ Test Equivalence Update flags after, Rn EOR shifter_operand
-		result = teq(p, Rn, shifter_operand);
+		result = teq(p, Rn, shifter_operand, shifter_carry_out);
 		break;
 	case CMP: 		// 1010 CMP Compare Update flags after, Rn - shifter_operand
 		result = cmp(p, Rn, shifter_operand);
@@ -317,16 +312,16 @@ uint32_t select_operation(arm_core p, uint32_t ins){
 		result = cmn(p,Rn, shifter_operand);
 		break;
 	case ORR: 		// 1100 ORR Logical (inclusive) OR, Rd := Rn OR shifter_operand
-		result = orr(p, S, Rd, Rn, shifter_operand);
+		result = orr(p, S, Rd, Rn, shifter_operand, shifter_carry_out);
 		break;
 	case MOV: 		// 1101 MOV Move, Rd := shifter_operand (no first operand)
-		result = mov(p, S, Rd, shifter_operand);
+		result = mov(p, S, Rd, shifter_operand, shifter_carry_out);
 		break;
 	case BIC: 		// 1110 BIC Bit Clear Rd := Rn AND NOT(shifter_operand)
-		result = bic(p, S, Rd, Rn, shifter_operand);
+		result = bic(p, S, Rd, Rn, shifter_operand, shifter_carry_out);
 		break;
 	case MVN: 		// 1111 MVN Move Not, Rd := NOT shifter_operand (no first operand)
-		result = mvn(p, S, Rd, shifter_operand);
+		result = mvn(p, S, Rd, shifter_operand, shifter_carry_out);
 		break;
 	default:
 		fprintf(stderr, "Opération non reconnue\n");
