@@ -115,7 +115,7 @@ uint32_t sub(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 	uint32_t value_rd = value_rn - shifter_operand;
 	arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = ~borrowFrom(value_rn, shifter_operand);
-	uint8_t flag_V = overflowFrom(value_rn, shifter_operand, value_rd, SUB);
+	uint8_t flag_V = overflowFrom(value_rn, shifter_operand, value_rd, 1);
 	update_flags(p, S, Rd, flag_C, flag_V);
 
 	return 0;
@@ -126,7 +126,7 @@ uint32_t rsb(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
     uint32_t value_rd = shifter_operand - value_rn;
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = ~borrowFrom(shifter_operand, value_rn);
-	uint8_t flag_V = overflowFrom(shifter_operand, value_rn, value_rd, SUB);
+	uint8_t flag_V = overflowFrom(shifter_operand, value_rn, value_rd, 0);
     update_flags(p, S, Rd, flag_C, flag_V);
 
     return 0;
@@ -140,7 +140,7 @@ uint32_t add(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 	uint32_t value_rd = value_rn + shifter_operand;
 	arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = carryFrom(value_rn, shifter_operand);
-	uint8_t flag_V = overflowFrom(value_rn,shifter_operand, value_rd, ADD);
+	uint8_t flag_V = overflowFrom(value_rn,shifter_operand, value_rd, 1);
 	update_flags(p, S, Rd,flag_C , flag_V);
     return 0;
 }
@@ -150,7 +150,7 @@ uint32_t adc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
 	uint32_t value_rd = arm_read_register(p, Rn) + shifter_operand + get_flag_C(p);
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = carryFrom(arm_read_register(p,Rn)+shifter_operand, get_flag_C(p));
-	uint8_t flag_V = overflowFrom(arm_read_register(p,Rn)+shifter_operand, get_flag_C(p), value_rd, ADD);
+	uint8_t flag_V = overflowFrom(arm_read_register(p,Rn)+shifter_operand, get_flag_C(p), value_rd, 1);
     update_flags(p, S, Rd, flag_C, flag_V);
 
     return 0;
@@ -160,7 +160,7 @@ uint32_t sbc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
     uint32_t value_rd = arm_read_register(p, Rn) - shifter_operand - (~get_flag_C(p));
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C =  ~borrowFrom(arm_read_register(p, Rn), shifter_operand - (~get_flag_C(p)));
-	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand - (~get_flag_C(p)), value_rd, SUB);
+	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand - (~get_flag_C(p)), value_rd, 0);
     update_flags(p, S, Rd, flag_C, flag_V);
 
     return 0;
@@ -171,7 +171,7 @@ uint32_t rsc(arm_core p, uint8_t S, uint8_t Rd, uint8_t Rn, uint32_t shifter_ope
     uint32_t value_rd = shifter_operand - arm_read_register(p, Rn) - (~get_flag_C(p));
     arm_write_register(p, Rd, value_rd);
 	uint8_t flag_C = ~borrowFrom(shifter_operand - (~get_flag_C(p)), arm_read_register(p, Rn));		//NOT BorrowFrom(shifter_operand - Rn - NOT(C Flag))
-	uint8_t flag_V = overflowFrom(shifter_operand - (~get_flag_C(p)), arm_read_register(p, Rn), value_rd, SUB);
+	uint8_t flag_V = overflowFrom(shifter_operand - (~get_flag_C(p)), arm_read_register(p, Rn), value_rd, 0);
 
     update_flags(p, S, Rd, flag_C, flag_V);
 
@@ -200,7 +200,7 @@ uint32_t cmp(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 
 	uint32_t alu_out = arm_read_register(p, Rn) - shifter_operand;
 	uint8_t flag_C = ~borrowFrom(arm_read_register(p, Rn), shifter_operand);
-	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, SUB);
+	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, 0);
 	write_flags(p,alu_out, flag_C, flag_V);
 
 	return 0;
@@ -208,7 +208,7 @@ uint32_t cmp(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 uint32_t cmn(arm_core p, uint8_t Rn, uint32_t shifter_operand){
 	uint32_t alu_out = arm_read_register(p, Rn) + shifter_operand;
 	uint8_t flag_C = carryFrom(arm_read_register(p, Rn), shifter_operand);
-	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, ADD);
+	uint8_t flag_V = overflowFrom(arm_read_register(p, Rn), shifter_operand, alu_out, 1);
 	write_flags(p,alu_out, flag_C, flag_V);
 
 	return 0;
